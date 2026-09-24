@@ -4,7 +4,10 @@ import { instruments } from "./config/instruments.js";
 import { createMarketGenerator } from "./generator/marketGenerator.js";
 import { createMarketState } from "./state/marketState.js";
 import { createIngestionService } from "./ingestion/ingestionService.js";
+import { createTickLoop } from "./stream/tickLoop.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
 
 app.use(cors());
@@ -12,6 +15,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 4000;
 const SEED = Number(process.env.SEED || 12345);
+const TICK_RATE = Number(
+  process.env.TICK_RATE || 10
+);
+
+const tickIntervalMs = 1000 / TICK_RATE;
 
 const generator = createMarketGenerator(
   instruments,
@@ -31,6 +39,12 @@ const ingestionService =
     marketState,
     knownSymbols
   });
+
+const tickLoop = createTickLoop({
+  generator,
+  ingestionService,
+  tickIntervalMs
+});
 
 app.get("/health", (req, res) => {
   res.json({
@@ -56,4 +70,6 @@ app.listen(PORT, () => {
   console.log(
     `Backend running on http://localhost:${PORT}`
   );
+
+  tickLoop.start();
 });
