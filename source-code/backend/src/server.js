@@ -1,11 +1,13 @@
 import express from "express";
 import cors from "cors";
+import http from "http";
 import { instruments } from "./config/instruments.js";
 import { createMarketGenerator } from "./generator/marketGenerator.js";
 import { createMarketState } from "./state/marketState.js";
 import { createIngestionService } from "./ingestion/ingestionService.js";
 import { createTickLoop } from "./stream/tickLoop.js";
 import { createMetricsService } from "./metrics/metricsService.js";
+import { createWebSocketServer } from "./stream/webSocketServer.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -14,6 +16,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const server = http.createServer(app);
+const webSocketServer =
+  createWebSocketServer({
+    server,
+    getSnapshot: () =>
+      marketState.getAll()
+  });
+  
 const PORT = process.env.PORT || 4000;
 const SEED = Number(process.env.SEED || 12345);
 const TICK_RATE = Number(
@@ -44,11 +54,14 @@ const ingestionService =
     metricsService
   });
 
-const tickLoop = createTickLoop({
-  generator,
-  ingestionService,
-  tickIntervalMs
-});
+const tickLoop =
+  createTickLoop({
+    generator,
+    ingestionService,
+    tickIntervalMs,
+    broadcast:
+      webSocketServer.broadcast
+  });
 
 app.get("/health", (req, res) => {
   res.json({
@@ -70,9 +83,21 @@ app.get("/snapshot", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
+//   console.log(
+//     `Backend running on http://localhost:${PORT}`
+//   );
+
+//   tickLoop.start();
+// });
+
+server.listen(PORT, () => {
   console.log(
     `Backend running on http://localhost:${PORT}`
+  );
+
+  console.log(
+    `WebSocket running on ws://localhost:${PORT}/stream`
   );
 
   tickLoop.start();

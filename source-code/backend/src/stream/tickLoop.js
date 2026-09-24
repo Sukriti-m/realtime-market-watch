@@ -1,7 +1,8 @@
 export function createTickLoop({
   generator,
   ingestionService,
-  tickIntervalMs = 100
+  tickIntervalMs = 100,
+  broadcast
 }) {
   let intervalId = null;
 
@@ -11,12 +12,26 @@ export function createTickLoop({
     }
 
     intervalId = setInterval(() => {
-      const symbols = generator.getSymbols();
+      const symbols =
+        generator.getSymbols();
 
       for (const symbol of symbols) {
-        const tick = generator.nextTick(symbol);
+        const tick =
+          generator.nextTick(symbol);
 
-        ingestionService.ingest(tick);
+        const result =
+          ingestionService.ingest(tick);
+
+        if (result.accepted) {
+          broadcast({
+            type: "MARKET_UPDATE",
+            timestamp: Date.now(),
+            data: {
+              tick: result.tick,
+              metrics: result.metrics
+            }
+          });
+        }
       }
     }, tickIntervalMs);
 
@@ -33,7 +48,9 @@ export function createTickLoop({
     clearInterval(intervalId);
     intervalId = null;
 
-    console.log("Tick loop stopped");
+    console.log(
+      "Tick loop stopped"
+    );
   }
 
   return {
