@@ -8,6 +8,7 @@ import {
 
 export function createMetricsService() {
   const state = new Map();
+  const lastMetrics = new Map();
 
   function processTick(tick) {
     const symbol = tick.symbol;
@@ -58,7 +59,7 @@ export function createMetricsService() {
     metricsState.previousPrice =
       currentPrice;
 
-    return {
+    const metrics = {
       symbol,
       ltp: currentPrice,
       change,
@@ -67,14 +68,18 @@ export function createMetricsService() {
       rollingAveragePrice: rollingAverage,
       momentum
     };
+
+    lastMetrics.set(symbol, metrics);
+
+    return metrics;
   }
 
   function get(symbol) {
-    return state.get(symbol);
+    return lastMetrics.get(symbol);
   }
 
   function getAll() {
-    return Array.from(state.values());
+    return Array.from(lastMetrics.values());
   }
 
   return {
