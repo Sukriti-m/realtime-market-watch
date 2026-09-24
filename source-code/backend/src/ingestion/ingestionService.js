@@ -2,7 +2,8 @@ import { validateTick } from "./tickValidator.js";
 
 export function createIngestionService({
   marketState,
-  knownSymbols
+  knownSymbols,
+  metricsService
 }) {
   function ingest(tick) {
     const validation = validateTick(
@@ -42,9 +43,13 @@ export function createIngestionService({
 
     marketState.update(tick);
 
+    const metrics =
+      metricsService.processTick(tick);
+
     return {
       accepted: true,
-      tick
+      tick,
+      metrics
     };
   }
 

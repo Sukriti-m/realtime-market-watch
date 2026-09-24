@@ -5,6 +5,7 @@ import { createMarketGenerator } from "./generator/marketGenerator.js";
 import { createMarketState } from "./state/marketState.js";
 import { createIngestionService } from "./ingestion/ingestionService.js";
 import { createTickLoop } from "./stream/tickLoop.js";
+import { createMetricsService } from "./metrics/metricsService.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -34,10 +35,13 @@ const knownSymbols = new Set(
   )
 );
 
+const metricsService = createMetricsService();
+
 const ingestionService =
   createIngestionService({
     marketState,
-    knownSymbols
+    knownSymbols,
+    metricsService
   });
 
 const tickLoop = createTickLoop({
