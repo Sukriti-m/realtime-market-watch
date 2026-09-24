@@ -1,5 +1,9 @@
 import { mulberry32 } from "./seededRandom.js";
 import { simulateNextPrice } from "./priceSimulator.js";
+import {
+  MIN_SPREAD,
+  SPREAD_BPS
+} from "../../../shared/thresholds.js";
 
 function roundToLot(quantity, lotSize) {
   return Math.round(quantity / lotSize) * lotSize;
@@ -28,9 +32,11 @@ function generateTick(state) {
 
   state.currentPrice = nextPrice;
 
+  const minSpread = config.minSpread ?? MIN_SPREAD;
+  const spreadBps = config.spreadBps ?? SPREAD_BPS;
   const spread = Math.max(
-    0.05,
-    (nextPrice * 2) / 10000
+    minSpread,
+    (nextPrice * spreadBps) / 10000
   );
 
   const bid = nextPrice - spread / 2;

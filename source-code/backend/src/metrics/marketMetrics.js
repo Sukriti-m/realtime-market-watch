@@ -1,27 +1,30 @@
+import { MOMENTUM_THRESHOLDS } from "../../../shared/thresholds.js";
+
 function round(value, decimals = 2) {
   const factor = 10 ** decimals;
 
   return Math.round(value * factor) / factor;
 }
 
-function calculateChange(currentPrice, previousPrice) {
-  if (previousPrice === null) {
+function calculateChange(currentPrice, baselinePrice) {
+  if (baselinePrice === null || baselinePrice === undefined) {
     return 0;
   }
 
-  return round(currentPrice - previousPrice);
+  return round(currentPrice - baselinePrice);
 }
 
-function calculateChangePercent(currentPrice, previousPrice) {
+function calculateChangePercent(currentPrice, baselinePrice) {
   if (
-    previousPrice === null ||
-    previousPrice === 0
+    baselinePrice === null ||
+    baselinePrice === undefined ||
+    baselinePrice === 0
   ) {
     return 0;
   }
 
   return round(
-    ((currentPrice - previousPrice) / previousPrice) * 100,
+    ((currentPrice - baselinePrice) / baselinePrice) * 100,
     4
   );
 }
@@ -58,19 +61,19 @@ function calculateRollingReturn(prices) {
 }
 
 function calculateMomentum(changePercent) {
-  if (changePercent > 1) {
+  if (changePercent > MOMENTUM_THRESHOLDS.STRONG_POSITIVE) {
     return "STRONG_POSITIVE";
   }
 
-  if (changePercent >= 0.25) {
+  if (changePercent >= MOMENTUM_THRESHOLDS.POSITIVE) {
     return "POSITIVE";
   }
 
-  if (changePercent >= -0.25) {
+  if (changePercent >= MOMENTUM_THRESHOLDS.NEGATIVE) {
     return "NEUTRAL";
   }
 
-  if (changePercent >= -1) {
+  if (changePercent >= MOMENTUM_THRESHOLDS.STRONG_NEGATIVE) {
     return "NEGATIVE";
   }
 

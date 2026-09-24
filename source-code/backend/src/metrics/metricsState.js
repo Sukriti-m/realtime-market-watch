@@ -1,6 +1,7 @@
-function createInstrumentMetrics() {
+function createInstrumentMetrics(sessionOpen) {
   return {
     previousPrice: null,
+    sessionOpen,
     prices: [],
     maxHistory: 10
   };
@@ -9,19 +10,19 @@ function createInstrumentMetrics() {
 export function createMetricsState() {
   const state = new Map();
 
-  function getOrCreate(symbol) {
+  function getOrCreate(symbol, sessionOpen) {
     if (!state.has(symbol)) {
       state.set(
         symbol,
-        createInstrumentMetrics()
+        createInstrumentMetrics(sessionOpen)
       );
     }
 
     return state.get(symbol);
   }
 
-  function update(symbol, price) {
-    const metrics = getOrCreate(symbol);
+  function update(symbol, price, sessionOpen) {
+    const metrics = getOrCreate(symbol, sessionOpen);
 
     metrics.previousPrice =
       metrics.prices.length > 0
@@ -30,10 +31,7 @@ export function createMetricsState() {
 
     metrics.prices.push(price);
 
-    if (
-      metrics.prices.length >
-      metrics.maxHistory
-    ) {
+    if (metrics.prices.length > metrics.maxHistory) {
       metrics.prices.shift();
     }
 

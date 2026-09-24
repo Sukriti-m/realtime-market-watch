@@ -1,8 +1,8 @@
 export function createTickLoop({
   generator,
   ingestionService,
-  tickIntervalMs = 100,
-  broadcast
+  tickIntervalMs = 50,
+  publishBatch
 }) {
   let intervalId = null;
 
@@ -12,27 +12,26 @@ export function createTickLoop({
     }
 
     intervalId = setInterval(() => {
-      const symbols =
-        generator.getSymbols();
+      const symbols = generator.getSymbols();
+      const updates = [];
 
       for (const symbol of symbols) {
-        const tick =
-          generator.nextTick(symbol);
-
-        const result =
-          ingestionService.ingest(tick);
+        const tick = generator.nextTick(symbol);
+        const result = ingestionService.ingest(tick);
 
         if (result.accepted) {
-          broadcast({
-            type: "MARKET_UPDATE",
-            timestamp: Date.now(),
-            data: {
-              tick: result.tick,
-              metrics: result.metrics
-            }
+          updates.push({
+            tick: result.tick,
+            metrics: result.metrics
           });
+        } else if (result.reason) {
+          console.warn(
+            `Dropped tick for ${symbol}: ${result.reason}`
+          );
         }
       }
+
+      publishBatch(updates);
     }, tickIntervalMs);
 
     console.log(
@@ -48,9 +47,7 @@ export function createTickLoop({
     clearInterval(intervalId);
     intervalId = null;
 
-    console.log(
-      "Tick loop stopped"
-    );
+    console.log("Tick loop stopped");
   }
 
   return {
