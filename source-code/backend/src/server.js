@@ -17,13 +17,18 @@ app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
-const webSocketServer =
-  createWebSocketServer({
-    server,
-    getSnapshot: () =>
-      marketState.getAll()
-  });
-  
+const getEnrichedSnapshot = () => {
+  return marketState.getAll().map((tick) => ({
+    tick,
+    metrics: metricsService.get(tick.symbol)
+  }));
+};
+
+const webSocketServer = createWebSocketServer({
+  server,
+  getSnapshot: getEnrichedSnapshot
+});
+
 const PORT = process.env.PORT || 4000;
 const SEED = Number(process.env.SEED || 12345);
 const TICK_RATE = Number(
@@ -79,7 +84,7 @@ app.get("/instruments", (req, res) => {
 app.get("/snapshot", (req, res) => {
   res.json({
     timestamp: Date.now(),
-    data: marketState.getAll()
+    data: getEnrichedSnapshot()
   });
 });
 
