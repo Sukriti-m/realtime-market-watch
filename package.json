@@ -2,10 +2,13 @@
   "name": "realtime-market-watch",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "source-code/backend",
+    "source-code/frontend"
+  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "npm --prefix source-code/backend run dev",
-    "dev:frontend": "npm --prefix source-code/frontend run dev"
+    "dev": "concurrently -n backend,frontend -c cyan,magenta \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "start": "npm run dev"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

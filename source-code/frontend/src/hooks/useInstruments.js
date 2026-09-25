@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useMarketStore } from "../store/marketStore.js";
-
-const API_URL = "http://localhost:4000";
+import { API_URL } from "../config/env.js";
 
 export function useInstruments() {
   const setInstrumentList = useMarketStore(
@@ -11,9 +10,7 @@ export function useInstruments() {
   useEffect(() => {
     async function fetchInstruments() {
       try {
-        const response = await fetch(
-          `${API_URL}/instruments`
-        );
+        const response = await fetch(`${API_URL}/instruments`);
 
         if (!response.ok) {
           throw new Error(
@@ -29,10 +26,7 @@ export function useInstruments() {
 
         setInstrumentList(symbols);
       } catch (error) {
-        console.error(
-          "Failed to fetch instruments:",
-          error
-        );
+        console.error("Failed to fetch instruments:", error);
       }
     }
 

@@ -1,55 +1,28 @@
 import { useEffect } from "react";
-
-import {
-  useMarketStore
-} from "../store/marketStore.js";
-
-const STALE_THRESHOLD_MS = 2000;
+import { useMarketStore } from "../store/marketStore.js";
+import { STALE_THRESHOLD_MS } from "../config/env.js";
 
 export function useStaleDataMonitor() {
-  const lastMessageAt =
-    useMarketStore(
-      (state) => state.lastMessageAt
-    );
-
-  const connectionStatus =
-    useMarketStore(
-      (state) => state.connectionStatus
-    );
-
-  const setConnectionStatus =
-    useMarketStore(
-      (state) => state.setConnectionStatus
-    );
+  const setConnectionStatus = useMarketStore(
+    (state) => state.setConnectionStatus
+  );
 
   useEffect(() => {
-    if (
-      !lastMessageAt ||
-      connectionStatus !== "CONNECTED"
-    ) {
-      return;
-    }
+    const intervalId = setInterval(() => {
+      const { lastMessageAt, connectionStatus } =
+        useMarketStore.getState();
 
-    const intervalId =
-      setInterval(() => {
-        const elapsed =
-          Date.now() - lastMessageAt;
-
-        if (
-          elapsed > STALE_THRESHOLD_MS
-        ) {
-          setConnectionStatus(
-            "STALE_DATA"
-          );
-        }
-      }, 500);
+      if (
+        lastMessageAt &&
+        connectionStatus === "CONNECTED" &&
+        Date.now() - lastMessageAt > STALE_THRESHOLD_MS
+      ) {
+        setConnectionStatus("STALE_DATA");
+      }
+    }, 500);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [
-    lastMessageAt,
-    connectionStatus,
-    setConnectionStatus
-  ]);
+  }, [setConnectionStatus]);
 }

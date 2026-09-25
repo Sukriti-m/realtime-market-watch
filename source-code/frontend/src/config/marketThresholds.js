@@ -1,6 +1,4 @@
-export const MOMENTUM_THRESHOLDS = {
-  STRONG_POSITIVE: 1,
-  POSITIVE: 0.25,
-  NEGATIVE: -0.25,
-  STRONG_NEGATIVE: -1
-};
+export {
+  MOMENTUM_THRESHOLDS,
+  STALE_THRESHOLD_MS
+} from "../../../shared/thresholds.js";

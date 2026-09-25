@@ -32,6 +32,12 @@ body {
   color: #111827;
 }
 
+.dashboard-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #667085;
+}
+
 .connection-status {
   display: inline-flex;
   align-items: center;
@@ -119,6 +125,48 @@ body {
 .instrument-cell {
   font-weight: 700;
   color: #111827;
+}
+
+.instrument-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.freshness-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.freshness-live {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.freshness-stale {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.row-stale td {
+  opacity: 0.55;
+}
+
+.positive,
+.strong-positive {
+  color: #16a34a;
+}
+
+.strong-positive {
+  font-weight: 700;
+}
+
+.strong-negative {
+  color: #b91c1c;
+  font-weight: 700;
 }
 
 .price-cell {
