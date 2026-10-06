@@ -48,7 +48,7 @@ function clampTickRate(value) {
 }
 
 const TICK_RATE = clampTickRate(
-  process.env.TICK_RATE || DEFAULT_TICK_RATE
+  DEFAULT_TICK_RATE
 );
 const tickIntervalMs = 1000 / TICK_RATE;
 

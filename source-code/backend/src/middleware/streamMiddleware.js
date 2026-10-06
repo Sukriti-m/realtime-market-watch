@@ -31,15 +31,6 @@ export function createStreamMiddleware({
     });
   }
 
-  function publishSnapshot(snapshot) {
-    broadcast({
-      type: "SNAPSHOT",
-      seq,
-      timestamp: Date.now(),
-      data: snapshot
-    });
-  }
-
   function start() {
     if (heartbeatId) {
       return;
@@ -66,7 +57,6 @@ export function createStreamMiddleware({
   return {
     getSeq,
     publishBatch,
-    publishSnapshot,
     start,
     stop
   };
