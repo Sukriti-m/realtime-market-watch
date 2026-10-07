@@ -1,6 +1,5 @@
 import { memo, useEffect, useState } from "react";
 import { useMarketStore } from "../store/marketStore.js";
-import { getMomentumClass } from "../utils/momentum.js";
 import { STALE_THRESHOLD_MS } from "../config/env.js";
 
 function formatSigned(value, digits) {
@@ -54,15 +53,16 @@ function MarketRow({ symbol }) {
   const isStale =
     !receivedAt || now - receivedAt > STALE_THRESHOLD_MS;
   const freshness = isStale ? "STALE" : "LIVE";
-  const momentumClass = getMomentumClass(changePercent);
-  const changeClass = getMomentumClass(changePercent);
+  const momentumClass = metrics.momentum.toLowerCase().replace("_", "-");
 
   return (
     <tr className={isStale ? "row-stale" : "row-live"}>
       <td className="instrument-cell">
         <div className="instrument-label">
           <span>{symbol}</span>
-          <span className={`freshness-badge freshness-${freshness.toLowerCase()}`}>
+          <span
+            className={`freshness-badge freshness-${freshness.toLowerCase()}`}
+          >
             {freshness}
           </span>
         </div>
@@ -79,11 +79,9 @@ function MarketRow({ symbol }) {
         {formatPrice(payload.ltp)}
       </td>
 
-      <td className={changeClass}>
-        {formatSigned(metrics?.change, 2)}
-      </td>
+      <td className={momentumClass}>{formatSigned(metrics?.change, 2)}</td>
 
-      <td className={changeClass}>
+      <td className={momentumClass}>
         {metrics && typeof metrics.changePercent === "number"
           ? `${formatSigned(metrics.changePercent, 4)}%`
           : "-"}
